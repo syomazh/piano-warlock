@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🎙️ AI Voice Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+        #startBtn {
+            width: 100%;
+            padding: 20px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+        }
+        #startBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        #startBtn:active {
+            transform: translateY(0);
+        }
+        #startBtn.listening {
+            background: #e74c3c;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        #transcript {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-height: 50px;
+            color: #333;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 10px;
+            min-height: 50px;
+            color: #2e7d32;
+        }
+        .label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-style: italic;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ AI Voice Assistant</h1>
+        
+        <button id="startBtn">🎤 Start Always Listening</button>
+        
+        <div class="status" id="status">Click to start listening for "Wolfgang" or "Mozart"...</div>
+        
+        <div>
+            <div class="label">📝 You said:</div>
+            <div id="transcript">...</div>
+        </div>
+        
+        <div>
+            <div class="label">🤖 Command Output:</div>
+            <div id="response" style="font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold;">...</div>
+        </div>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const statusDiv = document.getElementById('status');
+        const transcriptDiv = document.getElementById('transcript');
+        const responseDiv = document.getElementById('response');
+        
+        let isListening = false;
+        let recognition;
+        
+        // Check browser support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            statusDiv.textContent = '❌ Speech recognition not supported in this browser. Use Chrome!';
+            statusDiv.className = 'status error';
+            startBtn.disabled = true;
+        } else {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;  // Keep listening!
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            recognition.maxAlternatives = 1;
+            
+            // Give more time before stopping (helps capture full commands)
+            if ('speechSynthesis' in window) {
+                // Browser settings for better capture
+                recognition.interimResults = true;
+            }
+            
+            let isProcessing = false;  // Prevent multiple simultaneous requests
+            let lastTranscript = '';   // Track what we've seen
+            let silenceTimer = null;   // Timer for detecting end of speech
+            
+            startBtn.onclick = () => {
+                if (!isListening) {
+                    // Start listening
+                    isListening = true;
+                    startBtn.classList.add('listening');
+                    startBtn.textContent = '🔴 Always Listening...';
+                    statusDiv.textContent = '👂 Listening for "Wolfgang" or "Mozart"...';
+                    recognition.start();
+                } else {
+                    // Stop listening
+                    isListening = false;
+                    startBtn.classList.remove('listening');
+                    startBtn.textContent = '🎤 Start Always Listening';
+                    statusDiv.textContent = 'Stopped. Click to start again.';
+                    recognition.stop();
+                }
+            };
+            
+            recognition.onresult = async (event) => {
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript.toLowerCase();
+                    const isFinal = event.results[i].isFinal;
+                    
+                    // Check if wake word is present - "wolfgang" OR "mozart"
+                    if (transcript.includes('wolfgang') || transcript.includes('wolfang') || transcript.includes('wolf gang') ||
+                        transcript.includes('mozart') || transcript.includes('mozard') || transcript.includes('mo zart')) {
+                        
+                        // Clear any existing silence timer
+                        if (silenceTimer) {
+                            clearTimeout(silenceTimer);
+                            silenceTimer = null;
+                        }
+                        
+                        if (!isFinal) {
+                            // Show interim results while speaking
+                            transcriptDiv.textContent = '🎤 Hearing: "' + transcript + '" ...';
+                            lastTranscript = transcript;
+                        } else {
+                            // Final result - but wait a bit more to see if they keep talking
+                            lastTranscript = transcript;
+                            
+                            // Wait 0.5 seconds to see if more speech comes
+                            silenceTimer = setTimeout(async () => {
+                                if (isProcessing) return;  // Already processing another command
+                                isProcessing = true;
+                                
+                                // Extract the command after wake word
+                                let command = lastTranscript;
+                                
+                                // Remove wake word variants (more flexible matching)
+                                command = command.replace(/hey\s*wolfgang/gi, '').trim();
+                                command = command.replace(/hey\s*wolfang/gi, '').trim();
+                                command = command.replace(/wolfgang/gi, '').trim();
+                                command = command.replace(/wolfang/gi, '').trim();
+                                command = command.replace(/wolf\s*gang/gi, '').trim();
+                                command = command.replace(/hey\s*mozart/gi, '').trim();
+                                command = command.replace(/hey\s*mozard/gi, '').trim();
+                                command = command.replace(/mozart/gi, '').trim();
+                                command = command.replace(/mozard/gi, '').trim();
+                                command = command.replace(/mo\s*zart/gi, '').trim();
+                                
+                                // If no command after wake word, prompt user
+                                if (!command || command.length < 2) {
+                                    command = "Hello";
+                                }
+                                
+                                transcriptDiv.textContent = "🎯 Wake word detected! Command: " + command;
+                                statusDiv.textContent = '🤖 Getting AI response...';
+                                
+                                try {
+                                    // Send to backend server
+                                    const response = await fetch('http://localhost:5000/chat', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({ text: command })
+                                    });
+                                    
+                                    const data = await response.json();
+                                    responseDiv.textContent = data.command;
+                                    responseDiv.className = '';
+                                    statusDiv.textContent = '✅ Command executed!';
+                                    
+                                    // Speak the command for confirmation
+                                    let confirmation = '';
+                                    if (data.command.includes('play()')) {
+                                        confirmation = 'Playing';
+                                    } else if (data.command.includes('pause()')) {
+                                        confirmation = 'Paused';
+                                    } else if (data.command.includes('rewind')) {
+                                        // Check if positive (forward) or negative (backward)
+                                        const match = data.command.match(/rewind\(([-\d]+)\)/);
+                                        if (match) {
+                                            const seconds = parseInt(match[1]);
+                                            if (seconds < 0) {
+                                                confirmation = `Rewinding ${Math.abs(seconds)} seconds`;
+                                            } else {
+                                                confirmation = `Fast forwarding ${seconds} seconds`;
+                                            }
+                                        } else {
+                                            confirmation = 'Seeking';
+                                        }
+                                    } else if (data.command.includes('restart_song')) {
+                                        confirmation = 'Restarting song';
+                                    } else if (data.command.includes('select_song')) {
+                                        confirmation = 'Selecting song';
+                                    } else if (data.command.includes('set_playback_speed')) {
+                                        confirmation = 'Changing speed';
+                                    } else if (data.command.includes('no_understand')) {
+                                        confirmation = 'I did not understand that command';
+                                    }
+                                    
+                                    // Text-to-speech confirmation
+                                    if (confirmation) {
+                                        const utterance = new SpeechSynthesisUtterance(confirmation);
+                                        utterance.rate = 1.2;
+                                        utterance.pitch = 1;
+                                        
+                                        utterance.onend = () => {
+                                            statusDiv.textContent = '👂 Listening for "Wolfgang" or "Mozart"...';
+                                            isProcessing = false;
+                                        };
+                                        
+                                        speechSynthesis.speak(utterance);
+                                    } else {
+                                        statusDiv.textContent = '👂 Listening for "Wolfgang" or "Mozart"...';
+                                        isProcessing = false;
+                                    }
+                                    
+                                } catch (error) {
+                                    responseDiv.textContent = '❌ Error: ' + error.message;
+                                    responseDiv.className = 'error';
+                                    statusDiv.textContent = '👂 Listening for "Wolfgang" or "Mozart"...';
+                                    isProcessing = false;
+                                }
+                            }, 320);  // Wait 0.5 seconds for more speech
+                        }
+                    } else {    
+                        // Not the wake word - just show what was heard
+                        if (isFinal) {
+                            transcriptDiv.textContent = '⏸️ Ignored: "' + transcript + '" (waiting for "Wolfgang" or "Mozart")';
+                        } else {
+                            transcriptDiv.textContent = '🎤 Hearing: "' + transcript + '" ...';
+                        }
+                    }
+                }
+            };
+            
+            recognition.onerror = (event) => {
+                if (event.error === 'no-speech') {
+                    // Just keep listening
+                    return;
+                }
+                console.error('Speech recognition error:', event.error);
+                if (isListening && event.error !== 'aborted') {
+                    // Auto-restart on error (except if manually stopped)
+                    setTimeout(() => {
+                        if (isListening) {
+                            recognition.start();
+                        }
+                    }, 1000);
+                }
+            };
+            
+            recognition.onend = () => {
+                // Auto-restart if still supposed to be listening
+                if (isListening) {
+                    recognition.start();
+                }
+            };
+        }
+    </script>
+</body>
+</html>

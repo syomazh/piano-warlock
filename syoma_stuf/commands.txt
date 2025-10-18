@@ -1,0 +1,56 @@
+🎙️ WOLFGANG VOICE ASSISTANT - COMMAND REFERENCE
+================================================
+
+WAKE WORD:
+----------
+Just say "Wolfgang" anywhere in your sentence!
+- "Wolfgang play"
+- "Wolfgang pause" 
+- "Hey Wolfgang, go back 10 seconds"
+- "Wolfgang, play Bohemian Rhapsody"
+
+All work! No need to say "Hey" first.
+
+
+SUPPORTED COMMANDS:
+-------------------
+
+▶️  play()
+   Say: "play", "start", "resume", "go", "continue"
+
+⏸️  pause()
+   Say: "pause", "stop", "halt"
+
+⏪⏩ rewind(int x_seconds)
+   - NEGATIVE = go backwards (rewind)
+   - POSITIVE = go forward (fast forward)
+   
+   Say: "go back X seconds", "rewind", "skip ahead", "fast forward"
+   Examples:
+   - "Wolfgang, go back 10 seconds" → rewind(-10)
+   - "Wolfgang, skip ahead 30 seconds" → rewind(30)
+
+🔄 restart_song()
+   Say: "restart", "start over", "from the beginning"
+
+🎵 select_song(string song)
+   Say: "play [song name]", "switch to [song]"
+   Example: "Wolfgang, play Shape of You" → select_song("Shape of You")
+
+⚡ set_playback_speed(double speedfactor)
+   Say: "faster", "slower", "2x speed", "half speed"
+   Examples:
+   - "Wolfgang, faster" → set_playback_speed(1.5)
+   - "Wolfgang, 2x speed" → set_playback_speed(2.0)
+
+❓ no_understand()
+   Returned when command is unclear
+
+
+IMPROVEMENTS:
+-------------
+✅ Wake word is now just "Wolfgang" (not "Hey Wolfgang")
+✅ More lenient - waits 1.5 seconds after speech to capture full command
+✅ Shows live feedback as you speak
+✅ Prevents cutting off mid-sentence
+✅ Better handling of variations
