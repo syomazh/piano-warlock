@@ -1,0 +1,32 @@
+materials
+
+Parts:
+
+
+Arduino Uno R3
+
+LED diodes (1 per channel)
+
+220–1kΩ resistors (typical 220Ω)
+
+Jumper wires, breadboard
+
+USB cable (Arduino ↔ PC)
+
+Wiring (for each LED):
+
+Arduino digital pin → resistor (220Ω) → LED anode (long leg)
+
+LED cathode (short leg) → Arduino GND
+(If many LEDs, use a separate 5V supply and common ground. But discrete LEDs on Uno pins at low current usually OK.)
+
+
+Example mapping (changeable in code):
+
+
+Note 60 (Middle C) → Arduino pin 2
+
+Note 61 → pin 3
+
+Note 62 → pin 4
+... etc.
