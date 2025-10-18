@@ -84,14 +84,14 @@ User: "what's the weather" -> no_understand()"""
 def home():
     return """
     <h1>🎙️ AI Voice Assistant Server</h1>
-    <p>Server is running! Open test.html in your browser to use the assistant.</p>
+    <p>Server is running! Open index.html in your browser to use the assistant.</p>
     """
 
 if __name__ == '__main__':
     print("=" * 60)
     print("🚀 Starting AI Voice Assistant Web Server...")
     print("=" * 60)
-    print("📱 Open test.html in Chrome to use the assistant")
+    print("📱 Open index.html in Chrome to use the assistant")
     print("🌐 Server running at: http://localhost:5000")
     print("=" * 60)
     app.run(debug=True, port=5000)
