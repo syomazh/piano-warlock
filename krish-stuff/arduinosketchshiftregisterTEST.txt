@@ -1,0 +1,28 @@
+// 74HC595 test with Arduino Uno
+int dataPin = 11;   // SER
+int latchPin = 10;  // RCLK
+int clockPin = 13;  // SRCLK
+
+void setup() {
+  pinMode(dataPin, OUTPUT);
+  pinMode(latchPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+}
+
+void loop() {
+  // Loop through 8 LEDs
+  for (int i = 0; i < 8; i++) {
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, 1 << i);
+    digitalWrite(latchPin, HIGH);
+    delay(150);
+  }
+
+  // Count 0–255
+  for (int n = 0; n < 256; n++) {
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, n);
+    digitalWrite(latchPin, HIGH);
+    delay(100);
+  }
+}
