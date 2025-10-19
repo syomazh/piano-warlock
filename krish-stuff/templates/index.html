@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MIDI Controller</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px;
+    }
+    h1 {
+      color: #333;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+    }
+    .play { background: #10b981; }
+    .restart { background: #3b82f6; }
+    .stop { background: #ef4444; }
+  </style>
+</head>
+<body>
+  <h1>🎹 Arduino MIDI Player</h1>
+
+  <div>
+    <label>MIDI File Path:</label><br>
+    <input id="midiFile" type="text" size="80" value="C:\\Users\\krish\\Documents\\Repos\\piano-warlock\\other_folder\\ode-to-joy.mid">
+  </div>
+
+  <div class="controls">
+    <button class="play" onclick="sendCommand('/play', { start_time: 0, playback_speed: 1 })">▶️ Play</button>
+    <button class="restart" onclick="sendCommand('/play', { start_time: 0, playback_speed: 10 })">⏩ Restart Fast</button>
+    <button class="stop" onclick="sendCommand('/stop')">🛑 Stop</button>
+  </div>
+
+  <pre id="log" style="margin-top: 30px; background: #111; color: #0f0; padding: 15px; border-radius: 10px; width: 80%; height: 300px; overflow-y: auto;"></pre>
+
+  <script>
+    async function sendCommand(endpoint, body = {}) {
+      const midiFile = document.getElementById("midiFile").value;
+      body.midi_file = midiFile;
+      const log = document.getElementById("log");
+      log.textContent += `\n> Sending ${endpoint} ...`;
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        log.textContent += `\n✅ ${JSON.stringify(data, null, 2)}`;
+      } catch (err) {
+        log.textContent += `\n❌ Error: ${err.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
