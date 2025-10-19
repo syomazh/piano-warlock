@@ -2,6 +2,18 @@
 Voice-Controlled Music Player Interface
 This shows how to use the voice commands with your music player
 """
+from song_search import find_best_match, search_song, list_all_songs
+import subprocess
+import sys
+from pathlib import Path
+
+# Get the Python executable path
+PYTHON_EXE = sys.executable
+PLAY_MIDI_SCRIPT = Path(__file__).parent / "play_midi.py"
+
+# Current playback state
+current_song = None
+current_process = None
 
 # These are the functions that will be called based on voice commands
 def play():
@@ -34,8 +46,36 @@ def restart_song():
     
 def select_song(song_name):
     """Select and play a specific song"""
-    print(f"🎵 Selecting song: {song_name}")
-    # Add your music player code here
+    print(f"🔍 Searching for: {song_name}")
+    
+    # Search for the song
+    results = search_song(song_name, top_n=3)
+    
+    if not results:
+        print(f"❌ No songs found matching '{song_name}'")
+        print("\n📚 Available songs:")
+        for song in list_all_songs()[:10]:  # Show first 10
+            print(f"  - {song}")
+        return
+    
+    # Get best match
+    score, filename, full_path = results[0]
+    
+    print(f"✅ Found: {filename} (match: {score:.0%})")
+    
+    # If there are other good matches, show them
+    if len(results) > 1 and results[1][0] > 0.5:
+        print(f"   Other matches:")
+        for s, fn, _ in results[1:]:
+            print(f"     - {fn} ({s:.0%})")
+    
+    # Update current song
+    global current_song
+    current_song = full_path
+    
+    print(f"🎵 Playing: {filename}")
+    # Here you would integrate with your actual player
+    # For now, we'll just store the path
     
 def set_playback_speed(speed_factor):
     """Set playback speed (1.0 = normal, 2.0 = 2x, 0.5 = half)"""

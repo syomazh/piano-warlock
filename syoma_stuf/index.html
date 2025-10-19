@@ -6,17 +6,39 @@
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+        }
+        .top-boxes {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .top-box {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            min-height: 150px;
+            max-height: 250px;
+            overflow-y: auto;
         }
         .container {
             background: white;
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin: 300px auto 50px auto;
+            max-width: 600px;
         }
         h1 {
             text-align: center;
@@ -51,20 +73,41 @@
             50% { opacity: 0.7; }
         }
         #transcript {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            min-height: 50px;
+            margin-top: 10px;
             color: #333;
+            font-size: 16px;
+            line-height: 1.5;
         }
         #response {
+            margin-top: 10px;
+            color: #2e7d32;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+        #searchResult {
             margin-top: 20px;
             padding: 15px;
-            background: #e8f5e9;
+            background: #fff3e0;
             border-radius: 10px;
             min-height: 50px;
-            color: #2e7d32;
+            color: #e65100;
+            display: none;
+        }
+        #searchResult.playing {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 2px solid #1976d2;
+        }
+        #searchResult.not-found {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .song-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 8px;
         }
         .label {
             font-weight: bold;
@@ -81,9 +124,185 @@
             background: #ffebee;
             color: #c62828;
         }
+        .floating-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+        .floating-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        .floating-btn:active {
+            transform: scale(0.95);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: #667eea;
+        }
+        .close-btn {
+            font-size: 32px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: color 0.3s;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+        .help-section {
+            margin: 20px 0;
+        }
+        .help-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .help-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .help-section li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .help-section li:last-child {
+            border-bottom: none;
+        }
+        .command-example {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            display: inline-block;
+            margin: 4px 0;
+        }
+        .settings-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .settings-option:last-child {
+            border-bottom: none;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
     </style>
 </head>
 <body>
+    <!-- Top Boxes -->
+    <div class="top-boxes">
+        <div class="top-box">
+            <div class="label">📝 You said:</div>
+            <div id="transcript">...</div>
+        </div>
+        
+        <div class="top-box">
+            <div class="label">🤖 AI says:</div>
+            <div id="response">...</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
     <div class="container">
         <h1>🎙️ AI Voice Assistant</h1>
         
@@ -91,14 +310,111 @@
         
         <div class="status" id="status">Click to start listening for "Wolfgang" or "Mozart"...</div>
         
-        <div>
-            <div class="label">📝 You said:</div>
-            <div id="transcript">...</div>
+        <div id="searchResult">
+            <div class="label">🎵 Now Playing:</div>
+            <div id="searchDetails"></div>
         </div>
-        
-        <div>
-            <div class="label">🤖 Command Output:</div>
-            <div id="response" style="font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold;">...</div>
+    </div>
+
+    <!-- Floating Buttons -->
+    <div class="floating-buttons">
+        <button class="floating-btn" id="helpBtn" title="Help">❓</button>
+        <button class="floating-btn" id="settingsBtn" title="Settings">⚙️</button>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>❓ Help & Commands</h2>
+                <button class="close-btn" onclick="closeModal('helpModal')">&times;</button>
+            </div>
+            
+            <div class="help-section">
+                <h3>🎤 Wake Words</h3>
+                <p>Start your command with one of these:</p>
+                <ul>
+                    <li><span class="command-example">"Wolfgang, ..."</span></li>
+                    <li><span class="command-example">"Mozart, ..."</span></li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>🎵 Music Commands</h3>
+                <ul>
+                    <li><strong>Play:</strong> <span class="command-example">"Wolfgang, play"</span></li>
+                    <li><strong>Pause:</strong> <span class="command-example">"Mozart, pause"</span></li>
+                    <li><strong>Select Song:</strong> <span class="command-example">"Wolfgang, play Queen"</span></li>
+                    <li><strong>Restart:</strong> <span class="command-example">"Mozart, restart song"</span></li>
+                    <li><strong>Rewind:</strong> <span class="command-example">"Wolfgang, go back 10 seconds"</span></li>
+                    <li><strong>Fast Forward:</strong> <span class="command-example">"Mozart, skip ahead 30 seconds"</span></li>
+                    <li><strong>Speed Up:</strong> <span class="command-example">"Wolfgang, faster"</span></li>
+                    <li><strong>Slow Down:</strong> <span class="command-example">"Mozart, slower"</span></li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>💡 Tips</h3>
+                <ul>
+                    <li>Speak clearly and wait for the wake word to be detected</li>
+                    <li>Commands work best in a quiet environment</li>
+                    <li>You can use either "Wolfgang" or "Mozart" as the wake word</li>
+                    <li>The system continuously listens - no need to keep clicking the button</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Settings</h2>
+                <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
+            </div>
+
+            <div class="settings-option">
+                <div>
+                    <strong>Voice Confirmation</strong>
+                    <div style="font-size: 14px; color: #666;">Speak command confirmation aloud</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="voiceConfirmation" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="settings-option">
+                <div>
+                    <strong>Auto-restart Listening</strong>
+                    <div style="font-size: 14px; color: #666;">Automatically restart if listening stops</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoRestart" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="settings-option">
+                <div>
+                    <strong>Show Ignored Speech</strong>
+                    <div style="font-size: 14px; color: #666;">Display speech without wake word</div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="showIgnored" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="settings-option">
+                <div>
+                    <strong>Voice Speed</strong>
+                    <div style="font-size: 14px; color: #666;">Confirmation voice speed</div>
+                </div>
+                <input type="range" id="voiceSpeed" min="0.5" max="2" step="0.1" value="1.2" 
+                       style="width: 150px;">
+                <span id="voiceSpeedValue">1.2x</span>
+            </div>
         </div>
     </div>
 
@@ -107,9 +423,57 @@
         const statusDiv = document.getElementById('status');
         const transcriptDiv = document.getElementById('transcript');
         const responseDiv = document.getElementById('response');
+        const searchResultDiv = document.getElementById('searchResult');
+        const searchDetailsDiv = document.getElementById('searchDetails');
         
         let isListening = false;
         let recognition;
+        let currentSong = null;  // Track currently playing song
+        let isPlaying = false;   // Track play/pause state
+        
+        // Settings
+        let voiceConfirmationEnabled = true;
+        let autoRestartEnabled = true;
+        let showIgnoredEnabled = true;
+        let voiceSpeed = 1.2;
+        
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Button event listeners
+        document.getElementById('helpBtn').onclick = () => openModal('helpModal');
+        document.getElementById('settingsBtn').onclick = () => openModal('settingsModal');
+        
+        // Close modal when clicking outside
+        window.onclick = (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+        
+        // Settings event listeners
+        document.getElementById('voiceConfirmation').onchange = (e) => {
+            voiceConfirmationEnabled = e.target.checked;
+        };
+        
+        document.getElementById('autoRestart').onchange = (e) => {
+            autoRestartEnabled = e.target.checked;
+        };
+        
+        document.getElementById('showIgnored').onchange = (e) => {
+            showIgnoredEnabled = e.target.checked;
+        };
+        
+        document.getElementById('voiceSpeed').oninput = (e) => {
+            voiceSpeed = parseFloat(e.target.value);
+            document.getElementById('voiceSpeedValue').textContent = voiceSpeed.toFixed(1) + 'x';
+        };
         
         // Check browser support
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -219,6 +583,70 @@
                                     responseDiv.className = '';
                                     statusDiv.textContent = '✅ Command executed!';
                                     
+                                    // Update play/pause state
+                                    if (data.command.includes('play()')) {
+                                        isPlaying = true;
+                                    } else if (data.command.includes('pause()')) {
+                                        isPlaying = false;
+                                    }
+                                    
+                                    // Handle search results if present
+                                    if (data.search_result) {
+                                        
+                                        if (data.search_result.found) {
+                                            currentSong = data.search_result.filename;
+                                            isPlaying = true;  // Selecting a song starts playing it
+                                            
+                                            searchResultDiv.style.display = 'block';
+                                            searchResultDiv.className = 'playing';
+                                            
+                                            // Clean up the filename for display
+                                            let displayName = data.search_result.filename
+                                                .replace('.mid', '')
+                                                .replace(/_/g, ' ')
+                                                .replace(/-/g, ' - ');
+                                            
+                                            searchDetailsDiv.innerHTML = `
+                                                <div class="song-title">▶️ ${displayName}</div>
+                                                <div style="margin-top: 8px; font-size: 14px; opacity: 0.8;">
+                                                    Match: ${(data.search_result.score * 100).toFixed(0)}%
+                                                </div>
+                                            `;
+                                        } else {
+                                            searchResultDiv.style.display = 'block';
+                                            searchResultDiv.className = 'not-found';
+                                            let availableSongs = '';
+                                            if (data.search_result.available_songs) {
+                                                availableSongs = '<br><br>📚 Available songs:<br>' + 
+                                                    data.search_result.available_songs.map(s => `  • ${s.replace(/_/g, ' ')}`).join('<br>');
+                                            }
+                                            searchDetailsDiv.innerHTML = `
+                                                ❌ <strong>Not Found</strong><br>
+                                                🔍 Searched for: "${data.search_result.query}"
+                                                ${availableSongs}
+                                            `;
+                                        }
+                                    } else if (currentSong) {
+                                        // Update the display based on play/pause state
+                                        searchResultDiv.style.display = 'block';
+                                        searchResultDiv.className = 'playing';
+                                        
+                                        let displayName = currentSong
+                                            .replace('.mid', '')
+                                            .replace(/_/g, ' ')
+                                            .replace(/-/g, ' - ');
+                                        
+                                        let playIcon = isPlaying ? '▶️' : '⏸️';
+                                        let statusText = isPlaying ? 'Playing' : 'Paused';
+                                        
+                                        searchDetailsDiv.innerHTML = `
+                                            <div class="song-title">${playIcon} ${displayName}</div>
+                                            <div style="margin-top: 8px; font-size: 14px; opacity: 0.8;">
+                                                ${statusText}
+                                            </div>
+                                        `;
+                                    }
+                                    
                                     // Speak the command for confirmation
                                     let confirmation = '';
                                     if (data.command.includes('play()')) {
@@ -241,7 +669,11 @@
                                     } else if (data.command.includes('restart_song')) {
                                         confirmation = 'Restarting song';
                                     } else if (data.command.includes('select_song')) {
-                                        confirmation = 'Selecting song';
+                                        if (data.search_result && data.search_result.found) {
+                                            confirmation = `Playing ${data.search_result.filename.replace('.mid', '').replace(/_/g, ' ')}`;
+                                        } else {
+                                            confirmation = 'Song not found';
+                                        }
                                     } else if (data.command.includes('set_playback_speed')) {
                                         confirmation = 'Changing speed';
                                     } else if (data.command.includes('no_understand')) {
@@ -249,9 +681,9 @@
                                     }
                                     
                                     // Text-to-speech confirmation
-                                    if (confirmation) {
+                                    if (confirmation && voiceConfirmationEnabled) {
                                         const utterance = new SpeechSynthesisUtterance(confirmation);
-                                        utterance.rate = 1.2;
+                                        utterance.rate = voiceSpeed;
                                         utterance.pitch = 1;
                                         
                                         utterance.onend = () => {
@@ -275,10 +707,12 @@
                         }
                     } else {    
                         // Not the wake word - just show what was heard
-                        if (isFinal) {
-                            transcriptDiv.textContent = '⏸️ Ignored: "' + transcript + '" (waiting for "Wolfgang" or "Mozart")';
-                        } else {
-                            transcriptDiv.textContent = '🎤 Hearing: "' + transcript + '" ...';
+                        if (showIgnoredEnabled) {
+                            if (isFinal) {
+                                transcriptDiv.textContent = '⏸️ Ignored: "' + transcript + '" (waiting for "Wolfgang" or "Mozart")';
+                            } else {
+                                transcriptDiv.textContent = '🎤 Hearing: "' + transcript + '" ...';
+                            }
                         }
                     }
                 }
@@ -290,7 +724,7 @@
                     return;
                 }
                 console.error('Speech recognition error:', event.error);
-                if (isListening && event.error !== 'aborted') {
+                if (isListening && event.error !== 'aborted' && autoRestartEnabled) {
                     // Auto-restart on error (except if manually stopped)
                     setTimeout(() => {
                         if (isListening) {
@@ -302,7 +736,7 @@
             
             recognition.onend = () => {
                 // Auto-restart if still supposed to be listening
-                if (isListening) {
+                if (isListening && autoRestartEnabled) {
                     recognition.start();
                 }
             };

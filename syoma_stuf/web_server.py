@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
+from song_search import find_best_match, search_song, list_all_songs
 
 # Load environment variables
 load_dotenv()
@@ -66,6 +67,55 @@ User: "what's the weather" -> no_understand()"""
         command = response.choices[0].message.content.strip()
         print(f"🎵 Command: {command}")
         
+        # Check if it's a select_song command and search for it
+        if command.startswith('select_song('):
+            # Extract song name from command
+            import re
+            match = re.search(r'select_song\(["\'](.+?)["\']\)', command)
+            if match:
+                song_query = match.group(1)
+                print(f"🔍 Searching for song: {song_query}")
+                
+                # Search for the song
+                results = search_song(song_query, top_n=3)
+                
+                if results:
+                    score, filename, full_path = results[0]
+                    print(f"✅ Found: {filename} (match: {score:.0%})")
+                    
+                    # Create response with search results
+                    search_info = f"Found: {filename} ({score:.0%} match)"
+                    if len(results) > 1 and results[1][0] > 0.5:
+                        search_info += f"\nAlternatives: {results[1][1]}"
+                    
+                    return jsonify({
+                        'response': command,
+                        'command': command,
+                        'status': 'success',
+                        'search_result': {
+                            'found': True,
+                            'filename': filename,
+                            'full_path': full_path,
+                            'score': score,
+                            'message': search_info
+                        }
+                    })
+                else:
+                    print(f"❌ Song not found: {song_query}")
+                    available_songs = list_all_songs()[:5]  # Show first 5
+                    
+                    return jsonify({
+                        'response': command,
+                        'command': 'no_understand()',
+                        'status': 'success',
+                        'search_result': {
+                            'found': False,
+                            'query': song_query,
+                            'message': f"Song '{song_query}' not found",
+                            'available_songs': available_songs
+                        }
+                    })
+        
         return jsonify({
             'response': command,
             'command': command,
@@ -74,6 +124,8 @@ User: "what's the weather" -> no_understand()"""
         
     except Exception as e:
         print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'response': 'no_understand()',
             'command': 'no_understand()',
