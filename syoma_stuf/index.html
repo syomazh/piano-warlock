@@ -170,10 +170,11 @@
             line-height: 1.5;
         }
         .top-boxes #transcript {
-            color: #dda0dd;
+            color: #00008B;
             text-shadow: none;
             font-size: 16px;
             font-family: 'Times New Roman', serif;
+            margin-left: 30px;
         }
         #response {
             margin-top: 10px;
@@ -184,9 +185,10 @@
             line-height: 1.5;
         }
         .top-boxes #response {
-            color: black;
+            color: #00008B;
             text-shadow: none;
-            font-size: 14px;
+            font-size: 18px;
+            font-family: 'Times New Roman', serif;
         }
         #searchResult {
             position: fixed;
@@ -957,10 +959,10 @@
                                     let voiceFile = '';
                                     if (data.command.includes('play()')) {
                                         confirmation = 'Playing';
-                                        voiceFile = '../assets/wolfgang_voice_lines/The playback is commencing.m4a';
+                                        voiceFile = '../assets/wolfgang_voice_lines/the-playback-is-commencing.m4a';
                                     } else if (data.command.includes('pause()')) {
                                         confirmation = 'Paused';
-                                        voiceFile = '../assets/wolfgang_voice_lines/Song paused.m4a';
+                                        voiceFile = '../assets/wolfgang_voice_lines/song-paused_oU5ONp1V.m4a';
                                     } else if (data.command.includes('rewind')) {
                                         // Check if positive (forward) or negative (backward)
                                         const match = data.command.match(/rewind\(([-\d]+)\)/);
@@ -968,25 +970,25 @@
                                             const seconds = parseInt(match[1]);
                                             if (seconds < 0) {
                                                 confirmation = `Rewinding ${Math.abs(seconds)} seconds`;
-                                                voiceFile = '../assets/wolfgang_voice_lines/As u wish, rewinding.m4a';
+                                                voiceFile = '../assets/wolfgang_voice_lines/as-u-wish-rewinding.m4a';
                                             } else {
                                                 confirmation = `Fast forwarding ${seconds} seconds`;
-                                                voiceFile = '../assets/wolfgang_voice_lines/Fast forwarding.m4a';
+                                                voiceFile = '../assets/wolfgang_voice_lines/moving-forward_8S3RFsuD.m4a';
                                             }
                                         } else {
                                             confirmation = 'Seeking';
-                                            voiceFile = '../assets/wolfgang_voice_lines/As u wish, rewinding.m4a';
+                                            voiceFile = '../assets/wolfgang_voice_lines/as-u-wish-rewinding.m4a';
                                         }
                                     } else if (data.command.includes('restart_song')) {
                                         confirmation = 'Restarting song';
-                                        voiceFile = '../assets/wolfgang_voice_lines/Restarting from the beginning.m4a';
+                                        voiceFile = '../assets/wolfgang_voice_lines/restarting-from-the-beginning.m4a';
                                     } else if (data.command.includes('select_song')) {
                                         if (data.search_result && data.search_result.found) {
                                             confirmation = `Playing ${data.search_result.filename.replace('.mid', '').replace(/_/g, ' ')}`;
-                                            voiceFile = '../assets/wolfgang_voice_lines/The playback is commencing.m4a';
+                                            voiceFile = '../assets/wolfgang_voice_lines/the-playback-is-commencing.m4a';
                                         } else {
                                             confirmation = 'Song not found';
-                                            voiceFile = '../assets/wolfgang_voice_lines/I could not find that song, pls check the title.m4a';
+                                            voiceFile = '../assets/wolfgang_voice_lines/i-could-not-find-that-song-pls-check-the-title.m4a';
                                         }
                                     } else if (data.command.includes('set_playback_speed')) {
                                         confirmation = 'Changing speed';
@@ -994,18 +996,18 @@
                                         if (match) {
                                             const speed = parseFloat(match[1]);
                                             if (speed > 1) {
-                                                voiceFile = '../assets/wolfgang_voice_lines/Achtung! Now it gets faster.m4a';
+                                                voiceFile = '../assets/wolfgang_voice_lines/achtung-now-it-gets-faster.m4a';
                                             } else if (speed < 1) {
-                                                voiceFile = '../assets/wolfgang_voice_lines/As u command, slower.m4a';
+                                                voiceFile = '../assets/wolfgang_voice_lines/reducing-speed.m4a';
                                             } else {
-                                                voiceFile = '../assets/wolfgang_voice_lines/Speed adjusted.m4a';
+                                                voiceFile = '../assets/wolfgang_voice_lines/speed-adjusted_gNEfTgOB.m4a';
                                             }
                                         } else {
-                                            voiceFile = '../assets/wolfgang_voice_lines/Speed adjusted.m4a';
+                                            voiceFile = '../assets/wolfgang_voice_lines/speed-adjusted_gNEfTgOB.m4a';
                                         }
                                     } else if (data.command.includes('no_understand')) {
                                         confirmation = 'I did not understand that command';
-                                        voiceFile = '../assets/wolfgang_voice_lines/Command not recognized, pls repeat.m4a';
+                                        voiceFile = '../assets/wolfgang_voice_lines/command-not-recognized-pls-repeat.m4a';
                                     }
                                     
                                     // Play voice line confirmation
