@@ -66,6 +66,7 @@ void processLine(const String &line) {
   // Expect lines like: E,60,250
   if (line.length() == 0) return;
   if (line.charAt(0) != 'E') return;
+  Serial.println("Received: " + line); // Debug print
   // crude parse
   int firstComma = line.indexOf(',');
   int secondComma = line.indexOf(',', firstComma+1);

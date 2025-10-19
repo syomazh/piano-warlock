@@ -9,7 +9,7 @@ from difflib import SequenceMatcher
 import re
 
 # MIDI folder location
-MIDI_FOLDER = r"C:\Users\semyo\OneDrive\Documents\GitHub\piano-warlock\syoma_stuf\midi_folder"
+MIDI_FOLDER = r"C:\Users\semyo\OneDrive\Documents\GitHub\piano-warlock\assets\midi_datatbase"
 
 def normalize_string(s):
     """

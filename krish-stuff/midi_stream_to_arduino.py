@@ -18,7 +18,11 @@ def _play_midi_worker(midi_file, start_time, playback_speed, port, baud):
         mid = mido.MidiFile(midi_file)
 
         print(f"Opening serial port {port} @ {baud}")
-        ser = serial.Serial(port, baud, timeout=0.1)
+        try:
+            ser = serial.Serial(port, baud, timeout=0.1)
+        except Exception as e:
+            print(f"[Serial error] Could not open port {port}: {e}")
+            return
         time.sleep(2.0)
 
         events = []
@@ -80,15 +84,23 @@ def _play_midi_worker(midi_file, start_time, playback_speed, port, baud):
 
             print(f"Mapping {note} ({note_letter}) → {mapped_note} | "
                   f"event_t={ev_time:.3f}s real_t={time.time() - real_start:.3f}s dur={dur_ms}ms")
-            ser.write(line.encode('ascii'))
+            try:
+                ser.write(line.encode('ascii'))
+            except Exception as e:
+                print(f"[Serial write error] {e}")
             sent += 1
 
         print("✅ Playback complete or interrupted.")
-        ser.flush()
-        ser.close()
+        try:
+            ser.flush()
+            ser.close()
+        except Exception as e:
+            print(f"[Serial close error] {e}")
 
     except Exception as e:
+        import traceback
         print(f"[MIDI worker error] {e}")
+        traceback.print_exc()
 
 def play_midi(midi_file, start_time=0, playback_speed=1.0, port="COM3", baud=115200):
     """Launch non-blocking MIDI playback, interrupting any current one."""
@@ -103,10 +115,17 @@ def play_midi(midi_file, start_time=0, playback_speed=1.0, port="COM3", baud=115
 
         # Reset and start new one
         _stop_flag = False
+        def thread_wrapper():
+            try:
+                _play_midi_worker(midi_file, start_time, playback_speed, port, baud)
+            except Exception as e:
+                import traceback
+                print("[Thread error] Exception in MIDI playback thread:", e)
+                traceback.print_exc()
+
         _current_thread = threading.Thread(
-            target=_play_midi_worker,
-            args=(midi_file, start_time, playback_speed, port, baud),
+            target=thread_wrapper,
             daemon=True
         )
-        _current_thread.start()
-        print(f"🎶 Started new MIDI playback for {midi_file}")
+    _current_thread.start()
+    print(f"🎶 Started new MIDI playback for {midi_file}")
