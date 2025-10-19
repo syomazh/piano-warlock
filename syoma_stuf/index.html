@@ -1,44 +1,124 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🎙️ AI Voice Assistant</title>
+    <title>AI Voice Assistant</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            background: url('../assets/website_assets/backgroundspace.png') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            overflow: hidden;
         }
         .top-boxes {
             display: flex;
-            gap: 20px;
-            padding: 20px;
+            gap: 15px;
+            padding: 0 15px 15px 15px;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
+            justify-content: space-between;
             z-index: 100;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .top-box {
-            flex: 1;
+            flex: none;
+            width: 400px;
             background: white;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 0;
+            padding: 15px 20px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            min-height: 150px;
-            max-height: 250px;
-            overflow-y: auto;
+            height: 100px;
+            font-size: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .top-boxes .top-box:first-child {
+            background: url('C:/Users/semyo/OneDrive/Documents/GitHub/piano-warlock/assets/website_assets/treble_box.jpg') no-repeat center center;
+            background-size: contain;
+            box-shadow: none;
+        }
+        .top-boxes .top-box:last-child {
+            background: url('C:/Users/semyo/OneDrive/Documents/GitHub/piano-warlock/assets/website_assets/bass_box.jpg') no-repeat center center;
+            background-size: contain;
+            box-shadow: none;
         }
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            margin: 300px auto 50px auto;
-            max-width: 600px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .piano-container {
+            position: relative;
+            width: 400px;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #backPiano {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            z-index: 1;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+        }
+        #mozartImage {
+            position: relative;
+            max-width: 250px;
+            width: 100%;
+            height: auto;
+            z-index: 2;
+            transform: translateY(-120px);
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+        }
+        #frontPiano {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            z-index: 3;
+            pointer-events: none;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+        }
+        #mozartImage.talking {
+            animation: bounce 0.5s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { 
+                transform: translateY(-120px) rotate(0deg); 
+            }
+            25% { 
+                transform: translateY(-130px) rotate(-2deg); 
+            }
+            75% { 
+                transform: translateY(-130px) rotate(2deg); 
+            }
+        }
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            color: #fff;
+            font-style: italic;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px 24px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         h1 {
             text-align: center;
@@ -46,37 +126,54 @@
             margin-bottom: 30px;
         }
         #startBtn {
-            width: 100%;
-            padding: 20px;
-            font-size: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 80px;
+            background: none;
+            background-image: url('../assets/website_assets/treble_clef_pause_listening.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             border: none;
-            border-radius: 50px;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: none;
+            z-index: 200;
         }
         #startBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-50%) scale(1.1);
         }
         #startBtn:active {
-            transform: translateY(0);
+            transform: translateY(-50%) scale(0.95);
         }
         #startBtn.listening {
-            background: #e74c3c;
+            background-image: url('../assets/website_assets/treble_clef_start_ai_listening.png');
             animation: pulse 1.5s infinite;
         }
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            0%, 100% { 
+                transform: translateY(-50%) scale(1);
+                opacity: 1; 
+            }
+            50% { 
+                transform: translateY(-50%) scale(1.05);
+                opacity: 0.8; 
+            }
         }
         #transcript {
             margin-top: 10px;
             color: #333;
             font-size: 16px;
             line-height: 1.5;
+        }
+        .top-boxes #transcript {
+            color: #dda0dd;
+            text-shadow: none;
+            font-size: 16px;
+            font-family: 'Times New Roman', serif;
         }
         #response {
             margin-top: 10px;
@@ -86,33 +183,62 @@
             font-weight: bold;
             line-height: 1.5;
         }
+        .top-boxes #response {
+            color: black;
+            text-shadow: none;
+            font-size: 14px;
+        }
         #searchResult {
-            margin-top: 20px;
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
             padding: 15px;
-            background: #fff3e0;
-            border-radius: 10px;
+            background: transparent;
+            border-radius: 0;
             min-height: 50px;
-            color: #e65100;
+            min-width: 300px;
+            max-width: 400px;
+            color: #fff;
             display: none;
+            font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+            z-index: 150;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        #searchResult::before {
+            content: '';
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background-image: url('../assets/website_assets/record player.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            vertical-align: middle;
+            margin-right: 15px;
         }
         #searchResult.playing {
-            background: #e3f2fd;
-            color: #1565c0;
-            border: 2px solid #1976d2;
+            color: #fff;
         }
         #searchResult.not-found {
-            background: #ffebee;
-            color: #c62828;
+            color: #ff6b6b;
         }
         .song-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             margin-top: 8px;
+            display: inline;
         }
         .label {
             font-weight: bold;
             margin-bottom: 5px;
             color: #666;
+        }
+        #searchResult .label {
+            font-size: 18px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            display: inline;
         }
         .status {
             text-align: center;
@@ -121,8 +247,10 @@
             font-style: italic;
         }
         .error {
-            background: #ffebee;
+            background: rgba(255, 235, 238, 0.9);
             color: #c62828;
+            padding: 10px;
+            border-radius: 8px;
         }
         .floating-buttons {
             position: fixed;
@@ -136,21 +264,25 @@
         .floating-btn {
             width: 60px;
             height: 60px;
-            border-radius: 50%;
             border: none;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 28px;
+            background: none;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        }
+        #helpBtn {
+            background-image: url('../assets/website_assets/question mark button bottom right.png');
+        }
+        #settingsBtn {
+            background-image: url('../assets/website_assets/settings button bottom right.png');
         }
         .floating-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        #settingsBtn:hover {
+            transform: scale(1.1);
         }
         .floating-btn:active {
             transform: scale(0.95);
@@ -180,6 +312,103 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             animation: slideIn 0.3s;
         }
+        #settingsModal .modal-content {
+            background: linear-gradient(135deg, #9b4dca 0%, #6b2d8f 100%);
+            border-radius: 0;
+            font-family: Papyrus, fantasy;
+            box-shadow: 0 0 30px rgba(155, 77, 202, 0.8), 
+                        0 0 60px rgba(107, 45, 143, 0.6),
+                        inset 0 0 80px rgba(255, 255, 255, 0.1);
+            animation: slideIn 0.3s, sparkle 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        #settingsModal .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 70%
+            );
+            animation: sparkleMove 3s infinite;
+        }
+        #helpModal .modal-content {
+            background: linear-gradient(135deg, #9b4dca 0%, #6b2d8f 100%);
+            border-radius: 0;
+            font-family: Papyrus, fantasy;
+            box-shadow: 0 0 30px rgba(155, 77, 202, 0.8), 
+                        0 0 60px rgba(107, 45, 143, 0.6),
+                        inset 0 0 80px rgba(255, 255, 255, 0.1);
+            animation: slideIn 0.3s, sparkle 2s infinite;
+            position: relative;
+            overflow: hidden;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #helpModal .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 70%
+            );
+            animation: sparkleMove 3s infinite;
+        }
+        @keyframes sparkle {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(155, 77, 202, 0.8), 
+                            0 0 60px rgba(107, 45, 143, 0.6),
+                            inset 0 0 80px rgba(255, 255, 255, 0.1);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(155, 77, 202, 1), 
+                            0 0 80px rgba(107, 45, 143, 0.8),
+                            inset 0 0 100px rgba(255, 255, 255, 0.2);
+            }
+        }
+        @keyframes sparkleMove {
+            0% { transform: translate(-100%, -100%) rotate(0deg); }
+            100% { transform: translate(100%, 100%) rotate(360deg); }
+        }
+        #helpModal .modal-header h2 {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        #helpModal .close-btn {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        #helpModal .close-btn:hover {
+            color: #ffd700;
+        }
+        #helpModal .help-section h3 {
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        #helpModal .help-section p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        #helpModal .help-section li {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        #helpModal .command-example {
+            background: none;
+            color: #fff;
+            font-family: Papyrus, fantasy;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
         @keyframes slideIn {
             from {
                 transform: translateY(-50px);
@@ -200,6 +429,10 @@
             margin: 0;
             color: #667eea;
         }
+        #settingsModal .modal-header h2 {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
         .close-btn {
             font-size: 32px;
             font-weight: bold;
@@ -209,8 +442,15 @@
             background: none;
             transition: color 0.3s;
         }
+        #settingsModal .close-btn {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
         .close-btn:hover {
             color: #333;
+        }
+        #settingsModal .close-btn:hover {
+            color: #ffd700;
         }
         .help-section {
             margin: 20px 0;
@@ -244,6 +484,19 @@
             align-items: center;
             padding: 15px;
             border-bottom: 1px solid #eee;
+        }
+        #settingsModal .settings-option {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            position: relative;
+            z-index: 1;
+        }
+        #settingsModal .settings-option strong {
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        #settingsModal .settings-option div {
+            color: rgba(255, 255, 255, 0.9);
         }
         .settings-option:last-child {
             border-bottom: none;
@@ -286,52 +539,94 @@
         input:checked + .slider:before {
             transform: translateX(30px);
         }
+        .website-title {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'French Script MT', cursive;
+            font-size: 28px;
+            font-weight: bold;
+            font-style: italic;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            text-align: center;
+        }
+        .website-title span {
+            display: inline-block;
+            animation: wave 2s ease-in-out infinite;
+        }
+        .website-title span:nth-child(1) { animation-delay: 0s; }
+        .website-title span:nth-child(2) { animation-delay: 0.1s; }
+        .website-title span:nth-child(3) { animation-delay: 0.2s; }
+        .website-title span:nth-child(4) { animation-delay: 0.3s; }
+        .website-title span:nth-child(5) { animation-delay: 0.4s; }
+        .website-title span:nth-child(6) { animation-delay: 0.5s; }
+        .website-title span:nth-child(7) { animation-delay: 0.6s; }
+        .website-title span:nth-child(8) { animation-delay: 0.7s; }
+        .website-title span:nth-child(9) { animation-delay: 0.8s; }
+        .website-title span:nth-child(10) { animation-delay: 0.9s; }
+        .website-title span:nth-child(11) { animation-delay: 1.0s; }
+        .website-title span:nth-child(12) { animation-delay: 1.1s; }
+        .website-title span:nth-child(13) { animation-delay: 1.2s; }
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body>
+    <!-- Website Title -->
+    <div class="website-title">
+        <span>P</span><span>i</span><span>a</span><span>n</span><span>o</span><span>&nbsp;</span><span>W</span><span>a</span><span>r</span><span>l</span><span>o</span><span>c</span><span>k</span>
+    </div>
+
     <!-- Top Boxes -->
     <div class="top-boxes">
         <div class="top-box">
-            <div class="label">📝 You said:</div>
             <div id="transcript">...</div>
         </div>
         
         <div class="top-box">
-            <div class="label">🤖 AI says:</div>
             <div id="response">...</div>
         </div>
     </div>
 
+    <!-- Start/Stop Button (Fixed to Left Edge) -->
+    <button id="startBtn"></button>
+
     <!-- Main Container -->
     <div class="container">
-        <h1>🎙️ AI Voice Assistant</h1>
-        
-        <button id="startBtn">🎤 Start Always Listening</button>
-        
-        <div class="status" id="status">Click to start listening for "Wolfgang" or "Mozart"...</div>
-        
-        <div id="searchResult">
-            <div class="label">🎵 Now Playing:</div>
-            <div id="searchDetails"></div>
+        <div class="piano-container">
+            <img id="backPiano" src="../assets/website_assets/piano_background.png" alt="Piano Back">
+            <img id="mozartImage" src="../assets/website_assets/mozart wearing wizard hat.png" alt="Mozart the Wizard">
+            <img id="frontPiano" src="../assets/website_assets/piano_foreground.png" alt="Piano Front">
         </div>
+    </div>
+    
+    <!-- Now Playing Info (Fixed to Bottom) -->
+    <div id="searchResult">
+        <div class="label">Now Playing:</div>
+        <div id="searchDetails"></div>
     </div>
 
     <!-- Floating Buttons -->
     <div class="floating-buttons">
-        <button class="floating-btn" id="helpBtn" title="Help">❓</button>
-        <button class="floating-btn" id="settingsBtn" title="Settings">⚙️</button>
+        <button class="floating-btn" id="helpBtn" title="Help"></button>
+        <button class="floating-btn" id="settingsBtn" title="Settings"></button>
     </div>
 
     <!-- Help Modal -->
     <div id="helpModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>❓ Help & Commands</h2>
+                <h2>Help & Commands</h2>
                 <button class="close-btn" onclick="closeModal('helpModal')">&times;</button>
             </div>
             
             <div class="help-section">
-                <h3>🎤 Wake Words</h3>
+                <h3>Wake Words</h3>
                 <p>Start your command with one of these:</p>
                 <ul>
                     <li><span class="command-example">"Wolfgang, ..."</span></li>
@@ -340,7 +635,7 @@
             </div>
 
             <div class="help-section">
-                <h3>🎵 Music Commands</h3>
+                <h3>Music Commands</h3>
                 <ul>
                     <li><strong>Play:</strong> <span class="command-example">"Wolfgang, play"</span></li>
                     <li><strong>Pause:</strong> <span class="command-example">"Mozart, pause"</span></li>
@@ -354,7 +649,7 @@
             </div>
 
             <div class="help-section">
-                <h3>💡 Tips</h3>
+                <h3>Tips</h3>
                 <ul>
                     <li>Speak clearly and wait for the wake word to be detected</li>
                     <li>Commands work best in a quiet environment</li>
@@ -369,7 +664,7 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>⚙️ Settings</h2>
+                <h2>Settings</h2>
                 <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
             </div>
 
@@ -420,11 +715,11 @@
 
     <script>
         const startBtn = document.getElementById('startBtn');
-        const statusDiv = document.getElementById('status');
         const transcriptDiv = document.getElementById('transcript');
         const responseDiv = document.getElementById('response');
         const searchResultDiv = document.getElementById('searchResult');
         const searchDetailsDiv = document.getElementById('searchDetails');
+        const mozartImage = document.getElementById('mozartImage');
         
         let isListening = false;
         let recognition;
@@ -436,6 +731,17 @@
         let autoRestartEnabled = true;
         let showIgnoredEnabled = true;
         let voiceSpeed = 1.2;
+        
+        // Function to adjust font size based on text length
+        function adjustFontSize(element, maxSize, minSize) {
+            const text = element.textContent;
+            const length = text.length;
+            // Calculate font size: longer text -> smaller font
+            const factor = 50; // adjust this value to control how quickly font shrinks
+            let size = maxSize - (length / factor);
+            size = Math.max(minSize, Math.min(maxSize, size));
+            element.style.fontSize = size + 'px';
+        }
         
         // Modal functions
         function openModal(modalId) {
@@ -479,8 +785,7 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
         if (!SpeechRecognition) {
-            statusDiv.textContent = '❌ Speech recognition not supported in this browser. Use Chrome!';
-            statusDiv.className = 'status error';
+            alert('Speech recognition not supported in this browser. Use Chrome!');
             startBtn.disabled = true;
         } else {
             recognition = new SpeechRecognition();
@@ -504,15 +809,11 @@
                     // Start listening
                     isListening = true;
                     startBtn.classList.add('listening');
-                    startBtn.textContent = '🔴 Always Listening...';
-                    statusDiv.textContent = '👂 Listening for "Wolfgang" or "Mozart"...';
                     recognition.start();
                 } else {
                     // Stop listening
                     isListening = false;
                     startBtn.classList.remove('listening');
-                    startBtn.textContent = '🎤 Start Always Listening';
-                    statusDiv.textContent = 'Stopped. Click to start again.';
                     recognition.stop();
                 }
             };
@@ -534,7 +835,8 @@
                         
                         if (!isFinal) {
                             // Show interim results while speaking
-                            transcriptDiv.textContent = '🎤 Hearing: "' + transcript + '" ...';
+                            transcriptDiv.textContent = 'Hearing: "' + transcript + '" ...';
+                            adjustFontSize(transcriptDiv, 16, 8);
                             lastTranscript = transcript;
                         } else {
                             // Final result - but wait a bit more to see if they keep talking
@@ -565,8 +867,11 @@
                                     command = "Hello";
                                 }
                                 
-                                transcriptDiv.textContent = "🎯 Wake word detected! Command: " + command;
-                                statusDiv.textContent = '🤖 Getting AI response...';
+                                transcriptDiv.textContent = "Wake word detected! Command: " + command;
+                                adjustFontSize(transcriptDiv, 16, 8);
+                                
+                                // Make Mozart move while processing
+                                mozartImage.classList.add('talking');
                                 
                                 try {
                                     // Send to backend server
@@ -580,8 +885,8 @@
                                     
                                     const data = await response.json();
                                     responseDiv.textContent = data.command;
+                                    adjustFontSize(responseDiv, 14, 8);
                                     responseDiv.className = '';
-                                    statusDiv.textContent = '✅ Command executed!';
                                     
                                     // Update play/pause state
                                     if (data.command.includes('play()')) {
@@ -607,7 +912,7 @@
                                                 .replace(/-/g, ' - ');
                                             
                                             searchDetailsDiv.innerHTML = `
-                                                <div class="song-title">▶️ ${displayName}</div>
+                                                <div class="song-title">${displayName}</div>
                                                 <div style="margin-top: 8px; font-size: 14px; opacity: 0.8;">
                                                     Match: ${(data.search_result.score * 100).toFixed(0)}%
                                                 </div>
@@ -617,12 +922,12 @@
                                             searchResultDiv.className = 'not-found';
                                             let availableSongs = '';
                                             if (data.search_result.available_songs) {
-                                                availableSongs = '<br><br>📚 Available songs:<br>' + 
+                                                availableSongs = '<br><br>Available songs:<br>' + 
                                                     data.search_result.available_songs.map(s => `  • ${s.replace(/_/g, ' ')}`).join('<br>');
                                             }
                                             searchDetailsDiv.innerHTML = `
-                                                ❌ <strong>Not Found</strong><br>
-                                                🔍 Searched for: "${data.search_result.query}"
+                                                <strong>Not Found</strong><br>
+                                                Searched for: "${data.search_result.query}"
                                                 ${availableSongs}
                                             `;
                                         }
@@ -636,7 +941,7 @@
                                             .replace(/_/g, ' ')
                                             .replace(/-/g, ' - ');
                                         
-                                        let playIcon = isPlaying ? '▶️' : '⏸️';
+                                        let playIcon = isPlaying ? 'Playing' : 'Paused';
                                         let statusText = isPlaying ? 'Playing' : 'Paused';
                                         
                                         searchDetailsDiv.innerHTML = `
@@ -647,12 +952,15 @@
                                         `;
                                     }
                                     
-                                    // Speak the command for confirmation
+                                    // Voice confirmation
                                     let confirmation = '';
+                                    let voiceFile = '';
                                     if (data.command.includes('play()')) {
                                         confirmation = 'Playing';
+                                        voiceFile = '../assets/wolfgang_voice_lines/The playback is commencing.m4a';
                                     } else if (data.command.includes('pause()')) {
                                         confirmation = 'Paused';
+                                        voiceFile = '../assets/wolfgang_voice_lines/Song paused.m4a';
                                     } else if (data.command.includes('rewind')) {
                                         // Check if positive (forward) or negative (backward)
                                         const match = data.command.match(/rewind\(([-\d]+)\)/);
@@ -660,47 +968,64 @@
                                             const seconds = parseInt(match[1]);
                                             if (seconds < 0) {
                                                 confirmation = `Rewinding ${Math.abs(seconds)} seconds`;
+                                                voiceFile = '../assets/wolfgang_voice_lines/As u wish, rewinding.m4a';
                                             } else {
                                                 confirmation = `Fast forwarding ${seconds} seconds`;
+                                                voiceFile = '../assets/wolfgang_voice_lines/Fast forwarding.m4a';
                                             }
                                         } else {
                                             confirmation = 'Seeking';
+                                            voiceFile = '../assets/wolfgang_voice_lines/As u wish, rewinding.m4a';
                                         }
                                     } else if (data.command.includes('restart_song')) {
                                         confirmation = 'Restarting song';
+                                        voiceFile = '../assets/wolfgang_voice_lines/Restarting from the beginning.m4a';
                                     } else if (data.command.includes('select_song')) {
                                         if (data.search_result && data.search_result.found) {
                                             confirmation = `Playing ${data.search_result.filename.replace('.mid', '').replace(/_/g, ' ')}`;
+                                            voiceFile = '../assets/wolfgang_voice_lines/The playback is commencing.m4a';
                                         } else {
                                             confirmation = 'Song not found';
+                                            voiceFile = '../assets/wolfgang_voice_lines/I could not find that song, pls check the title.m4a';
                                         }
                                     } else if (data.command.includes('set_playback_speed')) {
                                         confirmation = 'Changing speed';
+                                        const match = data.command.match(/set_playback_speed\(([\d.]+)\)/);
+                                        if (match) {
+                                            const speed = parseFloat(match[1]);
+                                            if (speed > 1) {
+                                                voiceFile = '../assets/wolfgang_voice_lines/Achtung! Now it gets faster.m4a';
+                                            } else if (speed < 1) {
+                                                voiceFile = '../assets/wolfgang_voice_lines/As u command, slower.m4a';
+                                            } else {
+                                                voiceFile = '../assets/wolfgang_voice_lines/Speed adjusted.m4a';
+                                            }
+                                        } else {
+                                            voiceFile = '../assets/wolfgang_voice_lines/Speed adjusted.m4a';
+                                        }
                                     } else if (data.command.includes('no_understand')) {
                                         confirmation = 'I did not understand that command';
+                                        voiceFile = '../assets/wolfgang_voice_lines/Command not recognized, pls repeat.m4a';
                                     }
                                     
-                                    // Text-to-speech confirmation
-                                    if (confirmation && voiceConfirmationEnabled) {
-                                        const utterance = new SpeechSynthesisUtterance(confirmation);
-                                        utterance.rate = voiceSpeed;
-                                        utterance.pitch = 1;
-                                        
-                                        utterance.onend = () => {
-                                            statusDiv.textContent = '👂 Listening for "Wolfgang" or "Mozart"...';
+                                    // Play voice line confirmation
+                                    if (voiceFile && voiceConfirmationEnabled) {
+                                        const audio = new Audio(voiceFile);
+                                        audio.play();
+                                        audio.onended = () => {
+                                            mozartImage.classList.remove('talking');
                                             isProcessing = false;
                                         };
-                                        
-                                        speechSynthesis.speak(utterance);
                                     } else {
-                                        statusDiv.textContent = '👂 Listening for "Wolfgang" or "Mozart"...';
+                                        mozartImage.classList.remove('talking');
                                         isProcessing = false;
                                     }
                                     
                                 } catch (error) {
                                     responseDiv.textContent = '❌ Error: ' + error.message;
+                                    adjustFontSize(responseDiv, 14, 8);
                                     responseDiv.className = 'error';
-                                    statusDiv.textContent = '👂 Listening for "Wolfgang" or "Mozart"...';
+                                    mozartImage.classList.remove('talking');
                                     isProcessing = false;
                                 }
                             }, 320);  // Wait 0.5 seconds for more speech
@@ -709,9 +1034,11 @@
                         // Not the wake word - just show what was heard
                         if (showIgnoredEnabled) {
                             if (isFinal) {
-                                transcriptDiv.textContent = '⏸️ Ignored: "' + transcript + '" (waiting for "Wolfgang" or "Mozart")';
+                                transcriptDiv.textContent = 'Ignored: "' + transcript + '" (waiting for "Wolfgang" or "Mozart")';
+                                adjustFontSize(transcriptDiv, 16, 8);
                             } else {
-                                transcriptDiv.textContent = '🎤 Hearing: "' + transcript + '" ...';
+                                transcriptDiv.textContent = 'Hearing: "' + transcript + '" ...';
+                                adjustFontSize(transcriptDiv, 16, 8);
                             }
                         }
                     }
